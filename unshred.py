@@ -13,28 +13,32 @@ from math import sqrt
 INFINITY = 1e308
 
 def color_diff(c1, c2):
-    '''Returns differences between colors'''
-    if type(c1) == type(1):
-        return c1 - c2
+    '''Returns difference between two colors'''
     return tuple([x-y for x, y in zip(c1, c2)])
 
 def rms(cdiff):
-    '''root-mean-square
+    '''Root Mean Square
 
-    Not to be confused with the founder of the Free Software
-    Foundation.'''
-    if type(cdiff) == type(1): return cdiff
+    Not to be confused with that GNU geek.'''
     return sqrt(sum(x*x for x in cdiff))
 
-def right_diff(s1, s2):
+def diff(s1, s2):
     ## sufficient to match last column of s1 and first column of s2
     w, h = s1.size
 
-    s1_col_ends = [s1.getpixel((w-1, i)) for i in xrange(h)]
-    s2_col_ends = [s2.getpixel((0, i)) for i in xrange(h)]
+    s1_right = [s1.getpixel((w-1, i)) for i in xrange(h)]
+    s1_left = [s1.getpixel((0, i)) for i in xrange(h)]
 
-    cdiffs = [color_diff(c1, c2) for c1, c2 in zip(s1_col_ends, s2_col_ends)]
-    return sum([rms(cdiff) for cdiff in cdiffs])
+    s2_left = [s2.getpixel((0, i)) for i in xrange(h)]
+    s2_right = [s2.getpixel((w-1, i)) for i in xrange(h)]
+
+    rldiffs = [color_diff(c1, c2) for c1, c2 in zip(s1_right, s2_left)]
+    lrdiffs = [color_diff(c1, c2) for c1, c2 in zip(s1_left, s2_right)]
+
+    rldiff = sum([rms(diff) for diff in rldiffs])
+    lrdiff = sum([rms(diff) for diff in lrdiffs])
+
+    return (rldiff, lrdiff)
 
 def unshred(src):
     '''unshred(shredded_img) -> unshredded_img'''
@@ -52,27 +56,40 @@ def unshred(src):
     ## step 2, find matching columns
     idxs = range(num_cols)      # cache
 
-    matrix = [[right_diff(cols[i], cols[j]) for j in idxs] for i in idxs]
-    for i in idxs: matrix[i][i] = INFINITY # by definition
+    matrix = [[diff(cols[i], cols[j]) for j in idxs] for i in idxs]
+    for i in idxs: matrix[i][i] = (INFINITY, INFINITY) # by definition
 
-    graph = idxs[::]         # copy, don't recompute
+    rmatrix = [[matrix[i][j][0] for j in idxs] for i in idxs]
+    lmatrix = [[matrix[i][j][1] for j in idxs] for i in idxs]
+
+    rgraph = idxs[::]         # copy, don't recompute
+    lgraph = idxs[::]
     for i in idxs:
-        row = matrix[i]
+        row = rmatrix[i]
         closest = min(row)
-        rneighbor = row.index(closest)
-        graph[i] = (i, rneighbor)
+        neighbor = row.index(closest)
+        rgraph[i] = (i, neighbor, closest)
 
-    print graph
-    ograph = []                 # ordered graph
-    start = 0
+        row = lmatrix[i]
+        closest = min(row)
+        neighbor = row.index(closest)
+        lgraph[i] = (i, neighbor, closest)
+
+    orgraph = []                # ordered right graph
+    olgraph = []                # ordered left graph
+    lstart = 0
+    rstart = 0
     for i in xrange(num_cols):
-        ograph += [start]
-        start = graph[start][1]
+        orgraph += [rstart]
+        olgraph += [lstart]
+        rstart = rgraph[rstart][1]
+        lstart = lgraph[lstart][1]
 
-    print ograph
+    print orgraph
+    print olgraph[::-1]
 
     ## step 3, merge columns
-    for i, k in enumerate(ograph):
+    for i, k in enumerate(orgraph):
         result.paste(cols[k], (i*col_size, 0))
 
     return result
