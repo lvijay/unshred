@@ -42,9 +42,9 @@ def diff(s1, s2):
 
 def unshred(src, strip_width):
     '''unshred(shredded_img) -> unshredded_img'''
-    result = Image.new(image.mode, image.size)
+    result = Image.new(src.mode, src.size)
 
-    width, height = image.size
+    width, height = src.size
 
     ## step 1, find columns
     num_cols = width / strip_width # assume integer
@@ -96,13 +96,13 @@ def unshred(src, strip_width):
 
     return result
 
-if __name__ == '__main__':
+def main(argv):
     try:
-        filename = sys.argv[1]
-        saveto = sys.argv[2]
-        strip_width = 32 if len(sys.argv) < 3 else int(sys.argv[3])
+        filename = argv[1]
+        saveto = argv[2]
+        strip_width = 32 if len(argv) < 3 else int(argv[3])
     except IndexError:
-        print >> sys.stderr, ('Usage: %s [source] [dest] [width=32]' % sys.argv[0])
+        print >> sys.stderr, ('Usage: %s [source] [dest] [width=32]' % argv[0])
         exit(1)
 
     try:
@@ -113,5 +113,8 @@ if __name__ == '__main__':
     except IOError, e:
         print >> sys.stderr, e
         exit(2)
+
+if __name__ == '__main__':
+    main(sys.argv)
 
 # unshred.py ends here
