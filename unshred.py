@@ -32,7 +32,7 @@ def strip_diff(s1, s2):
     s2_col_ends = [s2.getpixel((0, i)) for i in xrange(h)]
 
     cdiffs = [color_diff(c1, c2) for c1, c2 in zip(s1_col_ends, s2_col_ends)]
-    return [rms(cdiff) for cdiff in cdiffs]
+    return sum([rms(cdiff) for cdiff in cdiffs])
 
 def unshred(src):
     '''unshred(shredded_img) -> unshredded_img'''
