@@ -100,7 +100,7 @@ def main(argv):
     try:
         filename = argv[1]
         saveto = argv[2]
-        strip_width = 32 if len(argv) < 3 else int(argv[3])
+        strip_width = 32 if len(argv) <= 3 else int(argv[3])
     except IndexError:
         print >> sys.stderr, ('Usage: %s [source] [dest] [width=32]' % argv[0])
         exit(1)
