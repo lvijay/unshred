@@ -12,6 +12,14 @@ from math import sqrt
 
 INFINITY = 1e308
 
+class WImage(object):
+    def __init__(self, image):
+        self.image = image
+        self.data = image.getdata()
+        self.w = image.size[0]
+    def getpixel(self, x, y):
+        return self.data[self.w * y + x]
+
 def color_diff(c1, c2):
     '''Returns difference between two colors'''
     return tuple([x-y for x, y in zip(c1, c2)])
@@ -23,14 +31,15 @@ def rms(cdiff):
     return sqrt(sum(x*x for x in cdiff))
 
 def diff(s1, s2):
-    ## sufficient to match last column of s1 and first column of s2
-    w, h = s1.size
+    ## match last column of s1 and first column of s2
+    ##   and first column of s1 and last column of s2
+    w, h = s1.image.size
 
-    s1_right = [s1.getpixel((w-1, i)) for i in xrange(h)]
-    s1_left = [s1.getpixel((0, i)) for i in xrange(h)]
+    s1_right = [s1.getpixel(w-1, i) for i in xrange(h)]
+    s1_left = [s1.getpixel(0, i) for i in xrange(h)]
 
-    s2_left = [s2.getpixel((0, i)) for i in xrange(h)]
-    s2_right = [s2.getpixel((w-1, i)) for i in xrange(h)]
+    s2_left = [s2.getpixel(0, i) for i in xrange(h)]
+    s2_right = [s2.getpixel(w-1, i) for i in xrange(h)]
 
     rldiffs = [color_diff(c1, c2) for c1, c2 in zip(s1_right, s2_left)]
     lrdiffs = [color_diff(c1, c2) for c1, c2 in zip(s1_left, s2_right)]
@@ -50,7 +59,8 @@ def unshred(src, strip_width):
     num_cols = width / strip_width # assume integer
 
     cs = strip_width
-    cols = [src.crop((i*cs, 0, (i+1)*cs, height)) for i in xrange(num_cols)]
+    cols = [WImage(src.crop((i*strip_width, 0, (i+1)*strip_width, height)))
+            for i in xrange(num_cols)]
 
     ## step 2, find matching columns
     idxs = range(num_cols)      # cache
@@ -92,7 +102,7 @@ def unshred(src, strip_width):
 
     ## step 3, merge columns
     for i, k in enumerate(ograph):
-        result.paste(cols[k], (i*strip_width, 0))
+        result.paste(cols[k].image, (i*strip_width, 0))
 
     return result
 
