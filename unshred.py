@@ -10,8 +10,13 @@ import sys
 from PIL import Image
 
 def unshred(src):
-    # for now, just create a new image and return
+    '''unshred(shredded_img) -> unshredded_img'''
     result = Image.new(image.mode, image.size)
+
+    ## step 1, find column boundaries
+    ## step 2, find matching columns
+    ## step 3, merge columns
+
     return result
 
 if __name__ == '__main__':
