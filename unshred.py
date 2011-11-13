@@ -63,17 +63,17 @@ def unshred(src):
         graph[i] = (i, rneighbor)
 
     print graph
-    g2 = []
+    ograph = []                 # ordered graph
     start = 0
     for i in xrange(num_cols):
-        g2 += [start]
+        ograph += [start]
         start = graph[start][1]
 
-    print g2
+    print ograph
 
     ## step 3, merge columns
-    for i, strip in enumerate(strips):
-        result.paste(strip, (i*col_size, 0))
+    for i, k in enumerate(ograph):
+        result.paste(cols[k], (i*col_size, 0))
 
     return result
 
