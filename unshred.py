@@ -102,7 +102,7 @@ if __name__ == '__main__':
         saveto = sys.argv[2]
         strip_width = 32 if len(sys.argv) < 3 else int(sys.argv[3])
     except IndexError:
-        print >> sys.stderr, ('Usage: %s [source] [dest]' % sys.argv[0])
+        print >> sys.stderr, ('Usage: %s [source] [dest] [width=32]' % sys.argv[0])
         exit(1)
 
     try:
