@@ -24,7 +24,7 @@ def rms(cdiff):
     if type(cdiff) == type(1): return cdiff
     return sqrt(sum(x*x for x in cdiff))
 
-def strip_diff(s1, s2):
+def right_diff(s1, s2):
     ## sufficient to match last column of s1 and first column of s2
     w, h = s1.size
 
