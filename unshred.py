@@ -10,6 +10,8 @@ import sys
 from PIL import Image
 from math import sqrt
 
+INFINITY = 1e308
+
 def color_diff(c1, c2):
     '''Returns differences between colors'''
     if type(c1) == type(1):
@@ -45,9 +47,30 @@ def unshred(src):
     num_cols = width / col_size # assume integer
 
     cs = col_size
-    strips = [src.crop((i*cs, 0, (i+1)*cs, height)) for i in xrange(num_cols)]
+    cols = [src.crop((i*cs, 0, (i+1)*cs, height)) for i in xrange(num_cols)]
 
     ## step 2, find matching columns
+    idxs = range(num_cols)      # cache
+
+    matrix = [[right_diff(cols[i], cols[j]) for j in idxs] for i in idxs]
+    for i in idxs: matrix[i][i] = INFINITY # by definition
+
+    graph = idxs[::]         # copy, don't recompute
+    for i in idxs:
+        row = matrix[i]
+        closest = min(row)
+        rneighbor = row.index(closest)
+        graph[i] = (i, rneighbor)
+
+    print graph
+    g2 = []
+    start = 0
+    for i in xrange(num_cols):
+        g2 += [start]
+        start = graph[start][1]
+
+    print g2
+
     ## step 3, merge columns
     for i, strip in enumerate(strips):
         result.paste(strip, (i*col_size, 0))
