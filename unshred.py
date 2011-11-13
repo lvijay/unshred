@@ -78,12 +78,9 @@ def unshred(src, strip_width):
     left_end = filter(None, lfilled)
     right_end = filter(None, rfilled)
 
-    if left_end:
-        start, left_side = left_end[0], True
-    elif right_end:
-        start, left_side = right_end[0], False
-    else:
-        start, left_side = 0, False
+    if left_end: start, left_side = left_end[0], True
+    elif right_end: start, left_side = right_end[0], False
+    else: start, left_side = 0, False
 
     sgraph = lgraph if left_side else rgraph # source graph
     ograph = []                # ordered graph
@@ -92,7 +89,6 @@ def unshred(src, strip_width):
         start = sgraph[start][1]
 
     ograph = ograph[::-1] if left_side else ograph
-    print ograph
 
     ## step 3, merge columns
     for i, k in enumerate(ograph):
