@@ -40,17 +40,16 @@ def diff(s1, s2):
 
     return (rldiff, lrdiff)
 
-def unshred(src):
+def unshred(src, strip_width):
     '''unshred(shredded_img) -> unshredded_img'''
     result = Image.new(image.mode, image.size)
 
     width, height = image.size
-    col_size = 32               # assume
 
     ## step 1, find columns
-    num_cols = width / col_size # assume integer
+    num_cols = width / strip_width # assume integer
 
-    cs = col_size
+    cs = strip_width
     cols = [src.crop((i*cs, 0, (i+1)*cs, height)) for i in xrange(num_cols)]
 
     ## step 2, find matching columns
@@ -97,7 +96,7 @@ def unshred(src):
 
     ## step 3, merge columns
     for i, k in enumerate(ograph):
-        result.paste(cols[k], (i*col_size, 0))
+        result.paste(cols[k], (i*strip_width, 0))
 
     return result
 
@@ -105,14 +104,14 @@ if __name__ == '__main__':
     try:
         filename = sys.argv[1]
         saveto = sys.argv[2]
+        strip_width = 32 if len(sys.argv) < 3 else int(sys.argv[3])
     except IndexError:
-        print >> sys.stderr, ('Usage: %s [source_image] [dest_image]'
-                              % sys.argv[0])
+        print >> sys.stderr, ('Usage: %s [source] [dest]' % sys.argv[0])
         exit(1)
 
     try:
         image = Image.open(filename)
-        unshredded_image = unshred(image)
+        unshredded_image = unshred(image, strip_width)
 
         unshredded_image.save(saveto)
     except IOError, e:
