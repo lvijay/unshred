@@ -8,6 +8,31 @@
 
 import sys
 from PIL import Image
+from math import sqrt
+
+def color_diff(c1, c2):
+    '''Returns differences between colors'''
+    if type(c1) == type(1):
+        return c1 - c2
+    return tuple([x-y for x, y in zip(c1, c2)])
+
+def rms(cdiff):
+    '''root-mean-square
+
+    Not to be confused with the founder of the Free Software
+    Foundation.'''
+    if type(cdiff) == type(1): return cdiff
+    return sqrt(sum(x*x for x in cdiff))
+
+def strip_diff(s1, s2):
+    ## sufficient to match last column of s1 and first column of s2
+    w, h = s1.size
+
+    s1_col_ends = [s1.getpixel((w-1, i)) for i in xrange(h)]
+    s2_col_ends = [s2.getpixel((0, i)) for i in xrange(h)]
+
+    cdiffs = [color_diff(c1, c2) for c1, c2 in zip(s1_col_ends, s2_col_ends)]
+    return [rms(cdiff) for cdiff in cdiffs]
 
 def unshred(src):
     '''unshred(shredded_img) -> unshredded_img'''
