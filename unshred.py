@@ -59,37 +59,44 @@ def unshred(src):
     matrix = [[diff(cols[i], cols[j]) for j in idxs] for i in idxs]
     for i in idxs: matrix[i][i] = (INFINITY, INFINITY) # by definition
 
-    rmatrix = [[matrix[i][j][0] for j in idxs] for i in idxs]
-    lmatrix = [[matrix[i][j][1] for j in idxs] for i in idxs]
-
     rgraph = idxs[::]         # copy, don't recompute
     lgraph = idxs[::]
     for i in idxs:
-        row = rmatrix[i]
-        closest = min(row)
-        neighbor = row.index(closest)
-        rgraph[i] = (i, neighbor, closest)
+        row = matrix[i]
+        rclosest = min(row, key=lambda x: x[0])
+        lclosest = min(row, key=lambda x: x[1])
+        rneighbor = row.index(rclosest)
+        lneighbor = row.index(lclosest)
+        rgraph[i] = (i, rneighbor)
+        lgraph[i] = (i, lneighbor)
 
-        row = lmatrix[i]
-        closest = min(row)
-        neighbor = row.index(closest)
-        lgraph[i] = (i, neighbor, closest)
+    # find node without a neighbor
+    rfilled = idxs[::]
+    lfilled = idxs[::]
+    for i in idxs:
+        rfilled[rgraph[i][1]] = None
+        lfilled[lgraph[i][1]] = None
+    left_end = filter(None, lfilled)
+    right_end = filter(None, rfilled)
 
-    orgraph = []                # ordered right graph
-    olgraph = []                # ordered left graph
-    lstart = 0
-    rstart = 0
+    if left_end:
+        start, left_side = left_end[0], True
+    elif right_end:
+        start, left_side = right_end[0], False
+    else:
+        start, left_side = 0, False
+
+    sgraph = lgraph if left_side else rgraph # source graph
+    ograph = []                # ordered graph
     for i in xrange(num_cols):
-        orgraph += [rstart]
-        olgraph += [lstart]
-        rstart = rgraph[rstart][1]
-        lstart = lgraph[lstart][1]
+        ograph += [start]
+        start = sgraph[start][1]
 
-    print orgraph
-    print olgraph[::-1]
+    ograph = ograph[::-1] if left_side else ograph
+    print ograph
 
     ## step 3, merge columns
-    for i, k in enumerate(orgraph):
+    for i, k in enumerate(ograph):
         result.paste(cols[k], (i*col_size, 0))
 
     return result
@@ -98,18 +105,18 @@ if __name__ == '__main__':
     try:
         filename = sys.argv[1]
         saveto = sys.argv[2]
-
-        image = Image.open(filename)
-        unshredded_image = unshred(image)
-        unshredded_image.save(saveto)
     except IndexError:
         print >> sys.stderr, ('Usage: %s [source_image] [dest_image]'
                               % sys.argv[0])
         exit(1)
+
+    try:
+        image = Image.open(filename)
+        unshredded_image = unshred(image)
+
+        unshredded_image.save(saveto)
     except IOError, e:
         print >> sys.stderr, e
         exit(2)
-    finally:
-        pass
 
 # unshred.py ends here
