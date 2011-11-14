@@ -100,21 +100,17 @@ def stable_marriage(matrix):
         tom = married_women[alice]
 
         if tom is None:         # alice isn't married
-            married_women[alice] = bob
-            married_men[bob] = alice
-        else:                   # is tom better than bob?
+            winner, loser = bob, None
+        else:                   # who does alice prefer?
             bob_rank = ranks[bob][alice][0]
             tom_rank = ranks[tom][alice][0]
-            if bob_rank > tom_rank: # bob wins
-                married_women[alice] = bob
-                married_men[bob] = alice
-                married_men[tom] = None
-                loser = tom
-            else:
-                loser = bob
-            free_men.extend([loser])
-            val, idx = ranks[loser][alice]
-            ranks[loser][alice] = (INFINITY, idx) # alice isn't for you
+            winner, loser = (bob, tom) if bob_rank > tom_rank else (tom, bob)
+        married_women[alice] = winner
+        married_men[winner] = alice
+        if loser is not None:
+            free_men += [loser]
+            ranks[loser][alice][0] = INFINITY # it was never meant to be
+            married_men[loser] = None
 
     return married_men
 
@@ -145,7 +141,7 @@ def unshred(src, strip_width):
         ograph += [start]
         start = sgraph[start]
 
-    print sgraph
+    assert len(ograph) == len(set(ograph)) # verify algorithm
 
     ## step 3, merge columns
     for i, k in enumerate(ograph):
