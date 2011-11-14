@@ -130,18 +130,30 @@ def unshred(src, strip_width):
     ## step 2, find matching columns
     idxs = range(num_cols)      # cache
 
-    rmatrix = [[diff(cols[i], cols[j]) for j in idxs] for i in idxs]
-    for i in idxs: rmatrix[i][i] = INFINITY # by definition
-    lmatrix = zip(*rmatrix)
+    matrix = [[diff(cols[i], cols[j]) for j in idxs] for i in idxs]
+    for i in idxs: matrix[i][i] = INFINITY # by definition
 
-    start = 0
-    sgraph = stable_marriage(rmatrix)
-    ograph = []                # ordered graph
+    graph = stable_marriage(matrix)
+
+    # form an ordered graph
+    start = 0                   # assume
+    ograph = []
     for i in xrange(num_cols):
         ograph += [start]
-        start = sgraph[start]
+        start = graph[start]
 
-    assert len(ograph) == len(set(ograph)) # verify algorithm
+    # find the last strip in the list of strips
+    max_jump = -INFINITY
+    last_strip = -1
+    for pv, v in zip(ograph[1:], ograph):
+        strip_diff = abs(matrix[v][graph[v]] - matrix[pv][graph[pv]])
+        if strip_diff > max_jump:
+            max_jump = strip_diff
+            last_strip = pv
+
+    # we've found the last strip.  rotate ograph accordingly
+    last_index = ograph.index(last_strip) + 1
+    ograph = ograph[last_index:] + ograph[:last_index]
 
     ## step 3, merge columns
     for i, k in enumerate(ograph):
