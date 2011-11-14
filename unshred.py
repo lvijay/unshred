@@ -57,7 +57,7 @@ def rms(cdiff):
     '''Root Mean Square
 
     Not to be confused with that GNU geek.'''
-    return sqrt(sum(x*x for x in cdiff))
+    return sqrt(sum((x*x for x in cdiff)))
 
 def diff(s1, s2):
     ## match last column of s1 with first column of s2
@@ -65,18 +65,11 @@ def diff(s1, s2):
     w, h = s1.image.size
 
     s1_right = [s1.getpixel(w-1, i) for i in xrange(h)]
-    s1_left = [s1.getpixel(0, i) for i in xrange(h)]
-
     s2_left = [s2.getpixel(0, i) for i in xrange(h)]
-    s2_right = [s2.getpixel(w-1, i) for i in xrange(h)]
 
-    rldiffs = [color_diff(c1, c2) for c1, c2 in zip(s1_right, s2_left)]
-    lrdiffs = [color_diff(c1, c2) for c1, c2 in zip(s1_left, s2_right)]
-
-    rldiff = sum([rms(diff) for diff in rldiffs])
-    lrdiff = sum([rms(diff) for diff in lrdiffs])
-
-    return (rldiff, lrdiff)
+    diffs = [color_diff(c1, c2) for c1, c2 in zip(s1_right, s2_left)]
+    diff = sum([rms(diff) for diff in rldiffs])
+    return diff
 
 def unshred(src, strip_width):
     '''unshred(shredded_img) -> unshredded_img'''
@@ -94,8 +87,9 @@ def unshred(src, strip_width):
     ## step 2, find matching columns
     idxs = range(num_cols)      # cache
 
-    matrix = [[diff(cols[i], cols[j]) for j in idxs] for i in idxs]
-    for i in idxs: matrix[i][i] = (INFINITY, INFINITY) # by definition
+    rmatrix = [[diff(cols[i], cols[j]) for j in idxs] for i in idxs]
+    for i in idxs: matrix[i][i] = INFINITY # by definition
+    lmatrix = zip(*rmatrix)     # transpose
 
     rgraph = idxs[::]         # copy, don't recompute
     lgraph = idxs[::]
