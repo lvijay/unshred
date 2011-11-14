@@ -1,4 +1,4 @@
-My solution to the Unshredder problem posted by Instagram. [1]
+My solution to the Unshredder problem posted by [Instagram][1].
 
 Motivation
 ----------
@@ -47,7 +47,14 @@ needed and comparing the edges of all strips.  Given two strips `s1`,
 edge of `s1` and left edge of `s2`, and color differences between all
 pixels on the left edge of `s1` and right edge of `s2`.
 
-Strips are ordered by minimal color differences between them.
+Strips are ordered by minimal color differences between them using the
+"Stable Marriage Problem" as described in [Wikipedia][2].
+
+After finding the ideal strip ordering, we need to identify the first
+and last strips.  This is done by computing the differences between
+adjacent _ordered_ strips.  The pair `(si, sj)` with greatest
+difference is assumed to be most apart and `si` is made the last strip
+and `s2` is made the first.
 
 Caveats
 -------
@@ -58,9 +65,9 @@ Caveats
    and felt it would be easier than playing with some Java libray I've
    never used.  _The code may not be canonical Python._
 
-2. Unshredding doesn't work under all circumstances.  Specifically, it
-   doesn't perform well when many adjacent strips are close to each
-   other.
+2. Unshredding doesn't work under all circumstances.  When the image's
+   strips are sufficiently similar to each other, the program gets
+   adjacent strips wrong.
 
 3. The program is not written for speed.  I have made exactly one
    improvement for the sake of speed: a wrapper class around
@@ -74,3 +81,4 @@ IMO the algorithm is mostly correct and the edge cases can be fixed by
 adding code rather than changing the existing algorithm.
 
 [1]: http://instagram-engineering.tumblr.com/post/12651721845/instagram-engineering-challenge-the-unshredder
+[2]: http://en.wikipedia.org/wiki/Stable_marriage_problem
