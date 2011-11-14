@@ -98,18 +98,23 @@ def stable_marriage(matrix):
         bob = free_men.pop()
         alice = min(ranks[bob])[1]
         tom = married_women[alice]
+
         if tom is None:         # alice isn't married
-            winner, loser = bob, tom
-        else:                   # tom vs bob?
+            married_women[alice] = bob
+            married_men[bob] = alice
+        else:                   # is tom better than bob?
             bob_rank = ranks[bob][alice][0]
             tom_rank = ranks[tom][alice][0]
-            winner, loser = (bob, tom) if bob_rank > tom_rank else (tom, bob)
+            if bob_rank > tom_rank: # bob wins
+                married_women[alice] = bob
+                married_men[bob] = alice
+                married_men[tom] = None
+                loser = tom
+            else:
+                loser = bob
             free_men.extend([loser])
-        married_women[alice] = winner
-        married_men[winner] = alice
-        if loser:
-            married_men[loser] = None
-            ranks[loser][alice][0] = INFINITY # alice isn't your best bet
+            val, idx = ranks[loser][alice]
+            ranks[loser][alice] = (INFINITY, idx) # alice isn't for you
 
     return married_men
 
