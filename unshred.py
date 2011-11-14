@@ -41,7 +41,7 @@ from math import sqrt
 
 INFINITY = 1e308
 
-class WImage(object):
+class WImage(object):           # to speed up pixel lookup
     def __init__(self, image):
         self.image = image
         self.data = image.getdata()
@@ -54,7 +54,7 @@ def color_diff(c1, c2):
     return tuple([x-y for x, y in zip(c1, c2)])
 
 def rms(cdiff):
-    '''Root Mean Square
+    '''Root Mean Square.
 
     Not to be confused with that GNU geek.'''
     return sqrt(sum((x*x for x in cdiff)))
