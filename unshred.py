@@ -68,8 +68,50 @@ def diff(s1, s2):
     s2_left = [s2.getpixel(0, i) for i in xrange(h)]
 
     diffs = [color_diff(c1, c2) for c1, c2 in zip(s1_right, s2_left)]
-    diff = sum([rms(diff) for diff in rldiffs])
+    diff = sum([rms(diff) for diff in diffs])
     return diff
+
+def stable_marriage(matrix):
+    '''Algorithm as described in Wikipedia:
+
+    function stableMatching {
+        Initialize all m ∈ M and w ∈ W to free
+        while ∃ free man m who still has a woman w to propose to {
+           w = m's highest ranked such woman who he has not proposed to yet
+           if w is free
+             (m, w) become engaged
+           else some pair (m', w) already exists
+             if w prefers m to m'
+               (m, w) become engaged
+               m' becomes free
+             else
+               (m', w) remain engaged
+        }
+    }'''
+    ranks = [[[c, i] for i, c in enumerate(row)] for row in matrix]
+    idxs = range(len(matrix))
+    free_men = idxs[::-1]
+    married_men = [None for i in idxs]
+    married_women = [None for i in idxs]
+
+    while len(free_men) > 0:
+        bob = free_men.pop()
+        alice = min(ranks[bob])[1]
+        tom = married_women[alice]
+        if tom is None:         # alice isn't married
+            winner, loser = bob, tom
+        else:                   # tom vs bob?
+            bob_rank = ranks[bob][alice][0]
+            tom_rank = ranks[tom][alice][0]
+            winner, loser = (bob, tom) if bob_rank > tom_rank else (tom, bob)
+            free_men.extend([loser])
+        married_women[alice] = winner
+        married_men[winner] = alice
+        if loser:
+            married_men[loser] = None
+            ranks[loser][alice][0] = INFINITY # alice isn't your best bet
+
+    return married_men
 
 def unshred(src, strip_width):
     '''unshred(shredded_img) -> unshredded_img'''
@@ -88,40 +130,17 @@ def unshred(src, strip_width):
     idxs = range(num_cols)      # cache
 
     rmatrix = [[diff(cols[i], cols[j]) for j in idxs] for i in idxs]
-    for i in idxs: matrix[i][i] = INFINITY # by definition
-    lmatrix = zip(*rmatrix)     # transpose
+    for i in idxs: rmatrix[i][i] = INFINITY # by definition
+    lmatrix = zip(*rmatrix)
 
-    rgraph = idxs[::]         # copy, don't recompute
-    lgraph = idxs[::]
-    for i in idxs:
-        row = matrix[i]
-        rclosest = min(row, key=lambda x: x[0])
-        lclosest = min(row, key=lambda x: x[1])
-        rneighbor = row.index(rclosest)
-        lneighbor = row.index(lclosest)
-        rgraph[i] = (i, rneighbor)
-        lgraph[i] = (i, lneighbor)
-
-    # find node without a neighbor
-    rfilled = idxs[::]
-    lfilled = idxs[::]
-    for i in idxs:
-        rfilled[rgraph[i][1]] = None
-        lfilled[lgraph[i][1]] = None
-    left_end = filter(None, lfilled)
-    right_end = filter(None, rfilled)
-
-    if left_end: start, left_side = left_end[0], True
-    elif right_end: start, left_side = right_end[0], False
-    else: start, left_side = 0, False
-
-    sgraph = lgraph if left_side else rgraph # source graph
+    start = 0
+    sgraph = stable_marriage(rmatrix)
     ograph = []                # ordered graph
     for i in xrange(num_cols):
         ograph += [start]
-        start = sgraph[start][1]
+        start = sgraph[start]
 
-    ograph = ograph[::-1] if left_side else ograph
+    print sgraph
 
     ## step 3, merge columns
     for i, k in enumerate(ograph):
