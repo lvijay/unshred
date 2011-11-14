@@ -1,3 +1,6 @@
+README
+======
+
 My solution to the Unshredder problem posted by [Instagram][1].
 
 Motivation
