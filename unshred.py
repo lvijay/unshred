@@ -61,15 +61,34 @@ def rms(cdiff):
 
 def diff(s1, s2):
     ## match last column of s1 with first column of s2
-    ##  and first column of s1 with last  column of s2
     w, h = s1.image.size
 
     s1_right = [s1.getpixel(w-1, i) for i in xrange(h)]
     s2_left = [s2.getpixel(0, i) for i in xrange(h)]
 
     diffs = [color_diff(c1, c2) for c1, c2 in zip(s1_right, s2_left)]
-    diff = sum([rms(diff) for diff in rldiffs])
+    diff = sum([rms(diff) for diff in diffs])
     return diff
+
+def order(matrix):
+    idxs = range(len(matrix))
+    matrix = [[(c, i) for i, c in enumerate(row)] for row in matrix]
+    def find_order(start, row, path=[], cost_path=[]):
+        if len(path) == len(idxs): return path, cost_path
+        while True:             # optimize this loop
+            best, nxt = min(row)
+            if nxt == start: break
+            if nxt in path: row[nxt] = (INFINITY, nxt)
+            else: break
+        start = nxt
+        return find_order(nxt, row, path + [start], cost_path + [best])
+
+    ## find all optimal paths starting from each index
+    ## the cheapest optimal path is the best
+    orders = [find_order(i, matrix[i]) for i in idxs]
+    paths = [ordr[0] for ordr in orders]
+    costs = [ordr[1] for ordr in orders]
+    print paths
 
 def unshred(src, strip_width):
     '''unshred(shredded_img) -> unshredded_img'''
@@ -87,45 +106,13 @@ def unshred(src, strip_width):
     ## step 2, find matching columns
     idxs = range(num_cols)      # cache
 
-    rmatrix = [[diff(cols[i], cols[j]) for j in idxs] for i in idxs]
+    matrix = [[diff(cols[i], cols[j]) for j in idxs] for i in idxs]
     for i in idxs: matrix[i][i] = INFINITY # by definition
-    lmatrix = zip(*rmatrix)     # transpose
 
-    rgraph = idxs[::]         # copy, don't recompute
-    lgraph = idxs[::]
-    for i in idxs:
-        row = matrix[i]
-        rclosest = min(row, key=lambda x: x[0])
-        lclosest = min(row, key=lambda x: x[1])
-        rneighbor = row.index(rclosest)
-        lneighbor = row.index(lclosest)
-        rgraph[i] = (i, rneighbor)
-        lgraph[i] = (i, lneighbor)
-
-    # find node without a neighbor
-    rfilled = idxs[::]
-    lfilled = idxs[::]
-    for i in idxs:
-        rfilled[rgraph[i][1]] = None
-        lfilled[lgraph[i][1]] = None
-    left_end = filter(None, lfilled)
-    right_end = filter(None, rfilled)
-
-    if left_end: start, left_side = left_end[0], True
-    elif right_end: start, left_side = right_end[0], False
-    else: start, left_side = 0, False
-
-    sgraph = lgraph if left_side else rgraph # source graph
-    ograph = []                # ordered graph
-    for i in xrange(num_cols):
-        ograph += [start]
-        start = sgraph[start][1]
-
-    ograph = ograph[::-1] if left_side else ograph
+    order(matrix)
 
     ## step 3, merge columns
-    for i, k in enumerate(ograph):
-        result.paste(cols[k].image, (i*strip_width, 0))
+    # TODO
 
     return result
 
