@@ -45,18 +45,16 @@ How it works
 ------------
 
 The program works by generating as many strips from the image as
-needed and comparing the edges of all strips.  Given two strips `s1`,
-`s2` it computes the color differences between all pixels on the right
-edge of `s1` and left edge of `s2`, and color differences between all
-pixels on the left edge of `s1` and right edge of `s2`.
-
-Strips are ordered by minimal color differences between them using the
-"Stable Marriage Problem" as described in [Wikipedia][2].
+needed and comparing the edges of all strips.  Given two strips `si`,
+`sj` it sums the color differences between all pixels on the right
+edge of `si` and left edge of `sj`.  The strips are then ordered on
+minimal color differences between them using the "Stable Marriage
+Problem" as described in [Wikipedia][2].
 
 After finding the ideal strip ordering, we need to identify the first
 and last strips.  This is done by computing the differences between
-adjacent ordered strips.  The pair `(si, si+1)` with the greatest
-difference is assumed to be most apart and `si` is made the last
+adjacent ordered strips.  The pair `(sj, sk)` with the greatest
+difference is assumed to be most apart and `sj` is made the last
 strip.
 
 Caveats
