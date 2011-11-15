@@ -70,12 +70,12 @@ def diff(s1, s2):
     diff = sum([rms(diff) for diff in diffs])
     return diff
 
-def order(matrix):
+def find_best_path(matrix):
     idxs = range(len(matrix))
     matrix = [[(c, i) for i, c in enumerate(row)] for row in matrix]
     def find_order(grph, start, path=[], cost_path=[]):
         if len(path) == len(idxs): return path, cost_path
-        while True:             # optimize this loop
+        while True:
             best, nxt = min(grph[start])
             if nxt == start: break
             if nxt in path: grph[start][nxt] = (INFINITY, nxt)
@@ -89,6 +89,10 @@ def order(matrix):
     orders = [find_order(mcopy(matrix), i, [i]) for i in idxs]
     paths = [ordr[0] for ordr in orders]
     costs = [ordr[1] for ordr in orders]
+    sum_costs = [sum(cost) for cost in costs]
+    cheapest_cost = min(sum_costs)
+    best_path = sum_costs.index(cheapest_cost)
+    return paths[best_path]
 
 def unshred(src, strip_width):
     '''unshred(shredded_img) -> unshredded_img'''
@@ -105,14 +109,14 @@ def unshred(src, strip_width):
 
     ## step 2, find matching columns
     idxs = range(num_cols)      # cache
-
     matrix = [[diff(cols[i], cols[j]) for j in idxs] for i in idxs]
     for i in idxs: matrix[i][i] = INFINITY # by definition
 
-    order(matrix)
+    best_path = find_best_path(matrix)
 
     ## step 3, merge columns
-    # TODO
+    for i, k in enumerate(best_path):
+        result.paste(cols[k].image, (i*strip_width, 0))
 
     return result
 
