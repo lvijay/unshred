@@ -55,9 +55,9 @@ Strips are ordered by minimal color differences between them using the
 
 After finding the ideal strip ordering, we need to identify the first
 and last strips.  This is done by computing the differences between
-adjacent _ordered_ strips.  The pair `(si, sj)` with greatest
-difference is assumed to be most apart and `si` is made the last strip
-and `s2` is made the first.
+adjacent ordered strips.  The pair `(si, si+1)` with the greatest
+difference is assumed to be most apart and `si` is made the last
+strip.
 
 Caveats
 -------
