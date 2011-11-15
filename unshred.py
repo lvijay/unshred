@@ -134,14 +134,14 @@ def unshred(src, strip_width):
 
     graph = stable_marriage(matrix)
 
-    # form an ordered graph
+    ## form an ordered graph
     start = 0                   # assume
     ograph = []
     for i in xrange(num_cols):
         ograph += [start]
         start = graph[start]
 
-    # find the last strip in the list of strips
+    ## find the last strip in the list of strips
     max_jump = -INFINITY
     last_strip = -1
     for pv, v in zip(ograph[1:], ograph):
@@ -150,8 +150,9 @@ def unshred(src, strip_width):
             max_jump = strip_diff
             last_strip = pv
 
-    # we've found the last strip.  rotate ograph accordingly
     last_index = ograph.index(last_strip) + 1
+
+    # we've found the last strip's index.  rotate ograph accordingly
     ograph = ograph[last_index:] + ograph[:last_index]
 
     ## step 3, merge columns
