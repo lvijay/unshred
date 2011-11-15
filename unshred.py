@@ -61,7 +61,6 @@ def rms(cdiff):
 
 def diff(s1, s2):
     ## match last column of s1 with first column of s2
-    ##  and first column of s1 with last  column of s2
     w, h = s1.image.size
 
     s1_right = [s1.getpixel(w-1, i) for i in xrange(h)]
