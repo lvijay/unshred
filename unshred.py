@@ -39,7 +39,7 @@ import sys
 from PIL import Image
 from math import sqrt
 
-INFINITY = 1e308
+INFINITY = float('inf')
 
 class WImage(object):
     def __init__(self, image):
