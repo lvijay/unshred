@@ -75,14 +75,14 @@ def diff(s1, s2):
 def find_best_path(matrix):
     idxs = range(len(matrix))
     matrix = [[(c, i) for i, c in enumerate(row)] for row in matrix]
-    def find_order(grph, start, path=[], cost_path=[]):
-        if len(path) == len(idxs): return path, cost_path
+    def find_order(grph, start, path=[], cost=0):
+        if len(path) == len(idxs): return (path, cost)
         while True:
             best, nxt = min(grph[start])
             if nxt in path: grph[start][nxt] = (INFINITY, nxt)
             else: break
         start = nxt
-        return find_order(grph, nxt, path + [start], cost_path + [best])
+        return find_order(grph, nxt, path + [start], cost + best)
 
     ## find all optimal paths starting from each index
     ## the cheapest optimal path is the best
@@ -90,9 +90,8 @@ def find_best_path(matrix):
     orders = [find_order(mcopy(matrix), i, [i]) for i in idxs]
     paths = [ordr[0] for ordr in orders]
     costs = [ordr[1] for ordr in orders]
-    sum_costs = [sum(cost) for cost in costs]
-    cheapest_cost = min(sum_costs)
-    best_path = sum_costs.index(cheapest_cost)
+    cheapest_cost = min(costs)
+    best_path = costs.index(cheapest_cost)
     return paths[best_path]
 
 def unshred(src, strip_width):
