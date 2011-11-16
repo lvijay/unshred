@@ -51,12 +51,14 @@ class WImage(object):
 
 def color_diff(c1, c2):
     '''Returns difference between two colors'''
+    if type(c1) in [int, long]: return c1 - c2
     return tuple([x-y for x, y in zip(c1, c2)])
 
 def rms(cdiff):
     '''Root Mean Square
 
     Not to be confused with that GNU geek.'''
+    if type(cdiff) in [int, long]: return cdiff
     return sqrt(sum((x*x for x in cdiff)))
 
 def diff(s1, s2):
