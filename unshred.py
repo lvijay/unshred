@@ -77,7 +77,6 @@ def find_best_path(matrix):
         if len(path) == len(idxs): return path, cost_path
         while True:
             best, nxt = min(grph[start])
-            if nxt == start: break
             if nxt in path: grph[start][nxt] = (INFINITY, nxt)
             else: break
         start = nxt
