@@ -109,10 +109,22 @@ def unshred(src, strip_width):
 
     ## step 2, find matching columns
     idxs = range(num_cols)      # cache
-    matrix = [[diff(cols[i], cols[j]) for j in idxs] for i in idxs]
-    for i in idxs: matrix[i][i] = INFINITY # by definition
+    m = [[diff(cols[i], cols[j]) if j != i else INFINITY for j in idxs] for i in idxs]
 
-    best_path = find_best_path(matrix)
+    best_path = find_best_path(m)
+
+    ## step 2.1 find the last column
+    rotate = lambda i: best_path[i:] + best_path[:i]
+    path, athp = best_path, rotate(1)
+
+    ## Calculate the differences between adjacent strips.  The highest
+    ## difference, between two strips (p, q) indicates, with high
+    ## probability, that p is the last strip and q the first.
+    path_diffs = [m[p][q] - m[q][p] for p, q in zip(path, athp)]
+    last_col = path_diffs.index(max(path_diffs))
+
+    ## we've found the last strip.  rotate accordingly
+    best_path = rotate(last_col + 1)
 
     ## step 3, merge columns
     for i, k in enumerate(best_path):
