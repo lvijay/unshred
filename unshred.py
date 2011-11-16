@@ -103,13 +103,13 @@ def unshred(src, strip_width):
     ## step 1, find columns
     num_cols = width / strip_width # assume integer
 
-    cs = strip_width
-    cols = [WImage(src.crop((i*strip_width, 0, (i+1)*strip_width, height)))
-            for i in xrange(num_cols)]
+    crop_dims = lambda x: (x*strip_width, 0, (x+1)*strip_width, height)
+    cols = [WImage(src.crop(crop_dims(i))) for i in xrange(num_cols)]
 
     ## step 2, find matching columns
     idxs = range(num_cols)      # cache
-    m = [[diff(cols[i], cols[j]) if j != i else INFINITY for j in idxs] for i in idxs]
+    col_diffs = lambda i, j: diff(cols[i], cols[j]) if i != j else INFINITY
+    m = [[col_diffs(i, j) for j in idxs] for i in idxs]
 
     best_path = find_best_path(m)
 
