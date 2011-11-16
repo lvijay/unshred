@@ -47,7 +47,16 @@ needed and comparing the edges of all strips.  Given two strips `s1`,
 edge of `s1` and left edge of `s2`, and color differences between all
 pixels on the left edge of `s1` and right edge of `s2`.
 
-Strips are ordered by minimal color differences between them.
+Strips are ordered by minimal color differences between them.  Since
+many such orderings are possible (depending upon the starting strip),
+all orderings are computed.  The cheapest ordering is taken as the
+correct path.
+
+After finding the optimal ordering, we have to find the first and last
+strips.  This is done by computing the differences between adjacent
+strips in the ideal order.  The highest difference indicates maximal
+difference between two strips.  So, if a pair, `(si, sj)` has the
+greatest difference, `si` is made the last strip and `sj` the first.
 
 Caveats
 -------
@@ -59,18 +68,11 @@ Caveats
    never used.  _The code may not be canonical Python._
 
 2. Unshredding doesn't work under all circumstances.  Specifically, it
-   doesn't perform well when many adjacent strips are close to each
-   other.
+   doesn't perform well when many strips are similar to each other.
 
 3. The program is not written for speed.  I have made exactly one
    improvement for the sake of speed: a wrapper class around
    `PIL.Image` to speed up pixel access.  The program was around 1.5
    times faster after that adjustment.
-
-Future work
------------
-
-IMO the algorithm is mostly correct and the edge cases can be fixed by
-adding code rather than changing the existing algorithm.
 
 [1]: http://instagram-engineering.tumblr.com/post/12651721845/instagram-engineering-challenge-the-unshredder
